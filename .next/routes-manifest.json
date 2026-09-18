@@ -1,0 +1,245 @@
+{
+  "version": 3,
+  "pages404": true,
+  "caseSensitive": false,
+  "basePath": "",
+  "redirects": [
+    {
+      "source": "/:path+/",
+      "destination": "/:path+",
+      "internal": true,
+      "priority": true,
+      "statusCode": 308,
+      "regex": "^(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))/$"
+    }
+  ],
+  "headers": [],
+  "rewrites": {
+    "beforeFiles": [],
+    "afterFiles": [],
+    "fallback": []
+  },
+  "dynamicRoutes": [
+    {
+      "page": "/api/auth/[...nextauth]",
+      "regex": "^/api/auth/(.+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPnextauth": "nxtPnextauth"
+      },
+      "namedRegex": "^/api/auth/(?<nxtPnextauth>.+?)(?:/)?$"
+    },
+    {
+      "page": "/api/jobs/[id]",
+      "regex": "^/api/jobs/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/jobs/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/courses/[id]",
+      "regex": "^/courses/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/courses/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/interviews/[id]",
+      "regex": "^/interviews/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/interviews/(?<nxtPid>[^/]+?)(?:/)?$"
+    }
+  ],
+  "staticRoutes": [
+    {
+      "page": "/",
+      "regex": "^/(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/(?:/)?$"
+    },
+    {
+      "page": "/_global-error",
+      "regex": "^/_global\\-error(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_global\\-error(?:/)?$"
+    },
+    {
+      "page": "/_not-found",
+      "regex": "^/_not\\-found(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_not\\-found(?:/)?$"
+    },
+    {
+      "page": "/admin",
+      "regex": "^/admin(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin(?:/)?$"
+    },
+    {
+      "page": "/admin/employers",
+      "regex": "^/admin/employers(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/employers(?:/)?$"
+    },
+    {
+      "page": "/admin/jobs",
+      "regex": "^/admin/jobs(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/jobs(?:/)?$"
+    },
+    {
+      "page": "/admin/users",
+      "regex": "^/admin/users(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/users(?:/)?$"
+    },
+    {
+      "page": "/api/admin/users",
+      "regex": "^/api/admin/users(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/users(?:/)?$"
+    },
+    {
+      "page": "/api/auth/signup",
+      "regex": "^/api/auth/signup(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/auth/signup(?:/)?$"
+    },
+    {
+      "page": "/api/employer/apply",
+      "regex": "^/api/employer/apply(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/employer/apply(?:/)?$"
+    },
+    {
+      "page": "/api/evaluate-interview",
+      "regex": "^/api/evaluate\\-interview(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/evaluate\\-interview(?:/)?$"
+    },
+    {
+      "page": "/api/generate-course",
+      "regex": "^/api/generate\\-course(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/generate\\-course(?:/)?$"
+    },
+    {
+      "page": "/api/generate-questions",
+      "regex": "^/api/generate\\-questions(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/generate\\-questions(?:/)?$"
+    },
+    {
+      "page": "/api/jobs",
+      "regex": "^/api/jobs(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/jobs(?:/)?$"
+    },
+    {
+      "page": "/api/jobs/cleanup",
+      "regex": "^/api/jobs/cleanup(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/jobs/cleanup(?:/)?$"
+    },
+    {
+      "page": "/api/profile",
+      "regex": "^/api/profile(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/profile(?:/)?$"
+    },
+    {
+      "page": "/api/resume/analyze",
+      "regex": "^/api/resume/analyze(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/resume/analyze(?:/)?$"
+    },
+    {
+      "page": "/api/resume/extract",
+      "regex": "^/api/resume/extract(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/resume/extract(?:/)?$"
+    },
+    {
+      "page": "/api/resume/generate",
+      "regex": "^/api/resume/generate(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/resume/generate(?:/)?$"
+    },
+    {
+      "page": "/courses",
+      "regex": "^/courses(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/courses(?:/)?$"
+    },
+    {
+      "page": "/employer",
+      "regex": "^/employer(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/employer(?:/)?$"
+    },
+    {
+      "page": "/employer/apply",
+      "regex": "^/employer/apply(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/employer/apply(?:/)?$"
+    },
+    {
+      "page": "/interviews",
+      "regex": "^/interviews(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/interviews(?:/)?$"
+    },
+    {
+      "page": "/jobs",
+      "regex": "^/jobs(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/jobs(?:/)?$"
+    },
+    {
+      "page": "/login",
+      "regex": "^/login(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/login(?:/)?$"
+    },
+    {
+      "page": "/profile",
+      "regex": "^/profile(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/profile(?:/)?$"
+    },
+    {
+      "page": "/resume",
+      "regex": "^/resume(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/resume(?:/)?$"
+    },
+    {
+      "page": "/signup",
+      "regex": "^/signup(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/signup(?:/)?$"
+    }
+  ],
+  "dataRoutes": [],
+  "rsc": {
+    "header": "rsc",
+    "varyHeader": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+    "prefetchHeader": "next-router-prefetch",
+    "didPostponeHeader": "x-nextjs-postponed",
+    "contentTypeHeader": "text/x-component",
+    "suffix": ".rsc",
+    "prefetchSuffix": ".prefetch.rsc",
+    "prefetchSegmentHeader": "next-router-segment-prefetch",
+    "prefetchSegmentSuffix": ".segment.rsc",
+    "prefetchSegmentDirSuffix": ".segments",
+    "clientParamParsing": false,
+    "dynamicRSCPrerender": false
+  },
+  "rewriteHeaders": {
+    "pathHeader": "x-nextjs-rewritten-path",
+    "queryHeader": "x-nextjs-rewritten-query"
+  }
+}

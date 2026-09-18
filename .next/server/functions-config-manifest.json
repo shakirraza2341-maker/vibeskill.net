@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "functions": {
+    "/api/auth/signup": {},
+    "/api/admin/users": {},
+    "/api/employer/apply": {},
+    "/api/jobs/[id]": {},
+    "/api/jobs/cleanup": {},
+    "/api/profile": {},
+    "/api/jobs": {},
+    "/api/resume/extract": {}
+  }
+}
