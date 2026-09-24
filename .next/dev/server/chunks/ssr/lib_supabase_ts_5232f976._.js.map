@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///E:/Projects/ai-mockinterview/lib/supabase.ts"],"sourcesContent":["import { createClient } from \"@supabase/supabase-js\";\r\n\r\nexport function getSupabaseServerClient() {\r\n  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;\r\n  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;\r\n\r\n  if (!url || !key) return null;\r\n\r\n  return createClient(url, key, {\r\n    auth: { autoRefreshToken: false, persistSession: false },\r\n  });\r\n}\r\n"],"names":[],"mappings":";;;;AAAA;;AAEO,SAAS;IACd,MAAM;IACN,MAAM,MAAM,QAAQ,GAAG,CAAC,yBAAyB;IAEjD;;IAEA,OAAO,IAAA,8LAAY,EAAC,KAAK,KAAK;QAC5B,MAAM;YAAE,kBAAkB;YAAO,gBAAgB;QAAM;IACzD;AACF","debugId":null}}]
-}

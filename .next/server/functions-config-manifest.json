@@ -1,13 +1,14 @@
 {
   "version": 1,
   "functions": {
-    "/api/auth/signup": {},
     "/api/admin/users": {},
+    "/api/auth/signup": {},
     "/api/employer/apply": {},
+    "/api/jobs": {},
     "/api/jobs/[id]": {},
     "/api/jobs/cleanup": {},
     "/api/profile": {},
-    "/api/jobs": {},
+    "/api/resume/analyze": {},
     "/api/resume/extract": {}
   }
 }

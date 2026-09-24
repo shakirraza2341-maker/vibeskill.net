@@ -1,8 +1,34 @@
 import { NextResponse } from "next/server";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { PDFParse } from "pdf-parse";
 import { requireUser } from "../../../../lib/auth-guard";
 
 export const runtime = "nodejs";
+
+PDFParse.setWorker(
+  pathToFileURL(
+    path.join(
+      process.cwd(),
+      "node_modules",
+      "pdf-parse",
+      "dist",
+      "pdf-parse",
+      "esm",
+      "pdf.worker.mjs",
+    ),
+  ).href,
+);
+
+async function extractPdfText(data: Uint8Array): Promise<string> {
+  const parser = new PDFParse({ data });
+  try {
+    const result = await parser.getText();
+    return result.text;
+  } finally {
+    await parser.destroy();
+  }
+}
 
 export async function POST(request: Request) {
   const { response: authResponse } = await requireUser();
@@ -18,15 +44,15 @@ export async function POST(request: Request) {
   }
 
   try {
-    const parser = new PDFParse({ data: Buffer.from(await file.arrayBuffer()) });
-    const result = await parser.getText();
-    await parser.destroy();
-    if (!result.text.trim()) {
+    const data = new Uint8Array(await file.arrayBuffer());
+    const text = await extractPdfText(data);
+    if (!text.trim()) {
       return NextResponse.json({ error: "This PDF does not contain readable text" }, { status: 422 });
     }
-    return NextResponse.json({ text: result.text });
+    return NextResponse.json({ text });
   } catch (error) {
     console.error("Resume PDF extraction failed:", error);
-    return NextResponse.json({ error: "Unable to read this PDF" }, { status: 422 });
+    const message = error instanceof Error ? error.message : "Unable to read this PDF";
+    return NextResponse.json({ error: `Unable to read this PDF: ${message}` }, { status: 422 });
   }
 }

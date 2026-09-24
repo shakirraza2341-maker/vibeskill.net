@@ -70,6 +70,34 @@ const emptyProfile: GuidedProfile = {
   projects: [newProject()],
 };
 
+async function readApiResponse<T extends object>(
+  response: Response,
+): Promise<T> {
+  const rawText = await response.text();
+  let result: T & { error?: string } = {} as T & { error?: string };
+  if (rawText.trim()) {
+    try {
+      result = JSON.parse(rawText) as T & { error?: string };
+    } catch {
+      const message = rawText.trim();
+      if (/^Server action/i.test(message)) {
+        throw new Error(
+          "The app session is out of date. Refresh the page and try again.",
+        );
+      }
+      throw new Error(
+        message.slice(0, 200) || "The server returned an invalid response.",
+      );
+    }
+  }
+  if (!response.ok) {
+    throw new Error(
+      result.error || "The server could not complete the request.",
+    );
+  }
+  return result;
+}
+
 export default function ResumePage() {
   const [sourceMode, setSourceMode] = useState<SourceMode>("existing");
   const [targetRole, setTargetRole] = useState("");
@@ -165,9 +193,8 @@ export default function ResumePage() {
           method: "POST",
           body: data,
         });
-        const result = await response.json();
-        if (!response.ok)
-          throw new Error(result.error || "Unable to read this PDF");
+        const result = await readApiResponse<{ text?: string }>(response);
+        if (!result.text) throw new Error("Unable to read this PDF");
         setRawText(result.text);
       }
     } catch (requestError) {
@@ -226,10 +253,9 @@ export default function ResumePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(buildInput()),
       });
-      const result = await response.json();
-      if (!response.ok)
-        throw new Error(result.error || "Unable to analyze your resume");
-      setAnalysis(result.analysis);
+      const result = await readApiResponse<{ analysis?: unknown }>(response);
+      if (!result.analysis) throw new Error("Unable to analyze your resume");
+      setAnalysis(result.analysis as ResumeAnalysis);
       setResume(null);
     } catch (requestError) {
       setError(
@@ -251,10 +277,9 @@ export default function ResumePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(buildInput()),
       });
-      const result = await response.json();
-      if (!response.ok)
-        throw new Error(result.error || "Unable to build your resume");
-      setResume(result.resume);
+      const result = await readApiResponse<{ resume?: unknown }>(response);
+      if (!result.resume) throw new Error("Unable to build your resume");
+      setResume(result.resume as GeneratedResume);
     } catch (requestError) {
       setError(
         requestError instanceof Error

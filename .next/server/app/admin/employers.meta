@@ -7,9 +7,25 @@
   "segmentPaths": [
     "/_tree",
     "/_full",
-    "/admin/employers/__PAGE__",
-    "/admin/employers",
-    "/admin",
-    "/_index"
-  ]
+    "/admin/employers/__PAGE__"
+  ],
+  "prefetchHints": {
+    "hints": 64,
+    "slots": {
+      "children": {
+        "hints": 96,
+        "slots": {
+          "children": {
+            "hints": 96,
+            "slots": {
+              "children": {
+                "hints": 160,
+                "slots": null
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }

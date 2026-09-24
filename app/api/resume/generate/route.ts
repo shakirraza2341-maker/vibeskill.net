@@ -2,6 +2,35 @@ import { NextResponse } from "next/server";
 import { requireUser } from "../../../../lib/auth-guard";
 import type { ResumeInput } from "../../../../lib/resume-types";
 
+function cleanJson(text: string) {
+  return text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
+}
+
+function getGeminiModels() {
+  const configuredModel = process.env.GEMINI_MODEL?.trim();
+  const normalizedModel = configuredModel && /^gemini-3\.6-flash$/i.test(configuredModel)
+    ? "gemini-2.5-flash"
+    : configuredModel || "gemini-2.5-flash";
+  return [...new Set([normalizedModel, "gemini-2.5-flash"])];
+}
+
+function getGeminiIssueMessage(details: string, fallback: string) {
+  try {
+    const errorBody = JSON.parse(details);
+    const message = typeof errorBody?.error?.message === "string" ? errorBody.error.message : "";
+    if (message.toLowerCase().includes("api key")) {
+      return "Gemini API key is invalid or expired. Update GEMINI_API_KEY in your environment and restart the app.";
+    }
+    if (message) return message;
+  } catch {
+    // Response may not be JSON.
+  }
+  if (details.toLowerCase().includes("api key")) {
+    return "Gemini API key is invalid or expired. Update GEMINI_API_KEY in your environment and restart the app.";
+  }
+  return fallback;
+}
+
 export async function POST(request: Request) {
   const { response: authResponse } = await requireUser();
   if (authResponse) return authResponse;
@@ -45,21 +74,44 @@ export async function POST(request: Request) {
         JSON.stringify(body!.profile),
       ].join("\n");
   try {
-    const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+    const models = getGeminiModels();
     const parts = file
-      ? [{ text: prompt }, { inline_data: { mime_type: file.type || "application/pdf", data: Buffer.from(await file.arrayBuffer()).toString("base64") } }]
+      ? [{ text: prompt }, { inlineData: { mimeType: file.type || "application/pdf", data: Buffer.from(await file.arrayBuffer()).toString("base64") } }]
       : [{ text: prompt }];
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ contents: [{ parts }], generationConfig: { responseMimeType: "application/json", temperature: 0.4 } }) });
-    if (!response.ok) {
-      const providerError = await response.text();
-      console.error("Gemini resume generation failed:", providerError);
-      return NextResponse.json({ error: "Gemini could not build this resume" }, { status: 502 });
+    let lastError = "Gemini could not build this resume";
+    for (const model of models) {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts }],
+          generationConfig: { responseMimeType: "application/json", temperature: 0.4 },
+        }),
+      });
+      const details = await response.text();
+      if (!response.ok) {
+        lastError = getGeminiIssueMessage(details, `Gemini ${response.status} (${model})`);
+        console.error("Gemini resume generation failed:", lastError, details);
+        continue;
+      }
+      try {
+        const result = JSON.parse(details);
+        const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (typeof text !== "string") throw new Error("Gemini returned no resume content");
+        const resume = JSON.parse(cleanJson(text));
+        if (typeof resume.name !== "string" || !resume.name.trim() || !Array.isArray(resume.skills)) {
+          throw new Error("Gemini returned an invalid resume");
+        }
+        return NextResponse.json({ resume });
+      } catch (parseError) {
+        lastError = `Gemini returned invalid content (${model})`;
+        console.error("Gemini resume generation response was invalid:", parseError, details);
+      }
     }
-    const result = await response.json();
-    const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (typeof text !== "string") throw new Error("No resume returned");
-    const resume = JSON.parse(text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim());
-    if (!resume.name || !Array.isArray(resume.skills)) throw new Error("Invalid resume");
-    return NextResponse.json({ resume });
-  } catch (error) { console.error("Resume generation failed:", error); return NextResponse.json({ error: "Unable to build this resume right now" }, { status: 502 }); }
+    throw new Error(lastError);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unable to build this resume right now";
+    console.error("Resume generation failed:", error);
+    return NextResponse.json({ error: message }, { status: 502 });
+  }
 }

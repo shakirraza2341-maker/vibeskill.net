@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 14, "column": 0}, "map": {"version":3,"sources":["file:///E:/Projects/ai-mockinterview/app/interviews/page.tsx"],"sourcesContent":["import CoursesPage from '../interviews/page'\r\n\r\nexport default function InterviewsIndexPage() {\r\n  return <CoursesPage />\r\n}"],"names":[],"mappings":";;;;;AAAA;;;AAEe,SAAS;IACtB,qBAAO,8OAAC,qIAAW;;;;;AACrB","debugId":null}},
-    {"offset": {"line": 33, "column": 0}, "map": {"version":3,"sources":["file:///E:/Projects/ai-mockinterview/app/courses/page.tsx"],"sourcesContent":["import CoursesPage from '../interviews/page'\r\n\r\nexport default function CoursesIndexPage() {\r\n  return <CoursesPage />\r\n}\r\n"],"names":[],"mappings":";;;;;AAAA;;;AAEe,SAAS;IACtB,qBAAO,8OAAC,qIAAW;;;;;AACrB","debugId":null}}]
-}

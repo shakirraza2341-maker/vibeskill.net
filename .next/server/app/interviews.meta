@@ -7,8 +7,20 @@
   "segmentPaths": [
     "/_tree",
     "/_full",
-    "/interviews/__PAGE__",
-    "/interviews",
-    "/_index"
-  ]
+    "/interviews/__PAGE__"
+  ],
+  "prefetchHints": {
+    "hints": 64,
+    "slots": {
+      "children": {
+        "hints": 96,
+        "slots": {
+          "children": {
+            "hints": 160,
+            "slots": null
+          }
+        }
+      }
+    }
+  }
 }
