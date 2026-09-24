@@ -6,8 +6,6 @@ const links = [
   { label: "Resume lab", href: "/resume" },
   { label: "Courses", href: "/courses" },
   { label: "Interviews", href: "/interviews" },
-  { label: "Profile", href: "/profile" },
-  { label: "Hire talent", href: "/employer/apply" },
 ];
 
 export default function SiteHeader() {
@@ -37,12 +35,6 @@ export default function SiteHeader() {
             <span className="ml-2 text-base" aria-hidden="true">
               ↗
             </span>
-          </Link>
-          <Link
-            className="py-2 text-muted transition-colors hover:text-ink"
-            href="/login"
-          >
-            Sign in
           </Link>
         </nav>
 
@@ -93,12 +85,6 @@ export default function SiteHeader() {
               <span className="text-base" aria-hidden="true">
                 ↗
               </span>
-            </Link>
-            <Link
-              className="mt-2 flex items-center justify-between border border-ink/20 px-4 py-3 text-[12px] font-bold"
-              href="/login"
-            >
-              Sign in <span aria-hidden="true">↗</span>
             </Link>
           </nav>
         </details>
