@@ -1,1 +1,0 @@
-globalThis.__RSC_MANIFEST=(globalThis.__RSC_MANIFEST||{});globalThis.__RSC_MANIFEST["/api/auth/[...nextauth]/route"]={"moduleLoading":{"prefix":"/_next/"},"ssrModuleMapping":{},"edgeSSRModuleMapping":{},"clientModules":{},"entryCSSFiles":{"E:\\React\\ai-mockinterview\\app\\api\\auth\\[...nextauth]\\route":[]},"rscModuleMapping":{},"edgeRscModuleMapping":{}};
