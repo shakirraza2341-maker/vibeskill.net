@@ -15,6 +15,8 @@ interface JobFormProps {
   isLoading: boolean;
   onSubmit: (data: JobFormData) => Promise<ValidationErrors>;
   onCancel: () => void;
+  companies?: { company_name: string }[];
+  userId?: string;
 }
 
 const COMMON_SKILLS = [
@@ -55,8 +57,11 @@ export default function JobForm({
   isLoading,
   onSubmit,
   onCancel,
+  companies = [],
+  userId,
 }: JobFormProps) {
   const [formData, setFormData] = useState<JobFormData>({
+    userId,
     company_name: job?.company_name || "",
     title: job?.title || "",
     description1: job?.description1 || "",
@@ -150,7 +155,7 @@ export default function JobForm({
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const validationErrors = await onSubmit(formData);
+    const validationErrors = await onSubmit({ ...formData, userId });
     setErrors(validationErrors);
   };
 
@@ -166,15 +171,32 @@ export default function JobForm({
           <label className="block text-sm font-medium text-gray-300 mb-2">
             Company Name *
           </label>
-          <input
-            type="text"
-            name="company_name"
-            value={formData.company_name}
-            onChange={handleChange}
-            disabled={isLoading}
-            placeholder="e.g., Acme Corporation"
-            className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-          />
+          {companies.length > 0 ? (
+            <select
+              name="company_name"
+              value={formData.company_name}
+              onChange={handleChange}
+              disabled={isLoading}
+              className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+            >
+              <option value="">Select a company...</option>
+              {companies.map((company) => (
+                <option key={company.company_name} value={company.company_name}>
+                  {company.company_name}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              type="text"
+              name="company_name"
+              value={formData.company_name}
+              onChange={handleChange}
+              disabled={isLoading}
+              placeholder="e.g., Acme Corporation"
+              className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+            />
+          )}
           {errors.company_name && (
             <p className="text-red-400 text-sm mt-1">{errors.company_name}</p>
           )}

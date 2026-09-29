@@ -19,6 +19,7 @@ export default function LoginPage() {
       password,
       redirect: false,
       callbackUrl: "/admin",
+        callbackUrl: "/profile",
     });
     if (!result?.ok) {
       setError("The email or password is incorrect.");
@@ -26,6 +27,7 @@ export default function LoginPage() {
       return;
     }
     window.location.assign(result.url ?? "/admin");
+      window.location.assign(result.url ?? "/profile");
   }
 
   return (

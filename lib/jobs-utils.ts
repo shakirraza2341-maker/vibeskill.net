@@ -14,12 +14,14 @@ export interface Job {
   remote_available: boolean;
   skills: string[];
   apply_url: string;
+  company_id?: string;
   is_active: boolean;
   created_at: string;
   updated_at?: string;
 }
 
 export interface JobFormData {
+  userId?: string;
   company_name: string;
   title: string;
   description1: string;

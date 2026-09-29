@@ -4,8 +4,8 @@ import VibeSkillLogo from "./VibeSkillLogo";
 const links = [
   { label: "Jobs", href: "/jobs" },
   { label: "Resume lab", href: "/resume" },
-  { label: "Courses", href: "/courses" },
-  { label: "Interviews", href: "/interviews" },
+  { label: "AI Courses", href: "/courses" },
+  { label: "Mock Interviews", href: "/interviews" },
 ];
 
 export default function SiteHeader() {
@@ -27,14 +27,12 @@ export default function SiteHeader() {
               {link.label}
             </Link>
           ))}
+
           <Link
             className="border border-white/30 px-4 py-2.5 transition-colors hover:bg-ink hover:text-paper"
-            href="/interviews"
+            href="/login"
           >
-            Start practicing{" "}
-            <span className="ml-2 text-base" aria-hidden="true">
-              ↗
-            </span>
+            Sign In
           </Link>
         </nav>
 

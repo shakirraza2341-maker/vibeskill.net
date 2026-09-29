@@ -17,13 +17,16 @@ export type JobDocument = {
   remote_available: boolean;
   skills: string[];
   apply_url?: string;
+  company_id?: ObjectId;
+  user_id?: ObjectId;
   is_active: boolean;
   created_at: Date;
   updated_at?: Date;
 };
 
-export type JobDto = Omit<JobDocument, "_id" | "created_at" | "updated_at"> & {
+export type JobDto = Omit<JobDocument, "_id" | "created_at" | "updated_at" | "company_id"> & {
   id: string;
+  company_id?: string;
   created_at: string;
   updated_at?: string;
 };
@@ -60,6 +63,8 @@ function toJobDto(job: JobDocument): JobDto {
     remote_available: job.remote_available,
     skills: job.skills,
     apply_url: job.apply_url,
+    ...(job.company_id ? { company_id: job.company_id.toHexString() } : {}),
+    ...(job.user_id ? { user_id: job.user_id.toHexString() } : {}),
     is_active: job.is_active,
     created_at: job.created_at.toISOString(),
     ...(job.updated_at ? { updated_at: job.updated_at.toISOString() } : {}),
@@ -70,10 +75,34 @@ function getIdFilter(id: string): Filter<JobDocument> | null {
   return ObjectId.isValid(id) ? { _id: new ObjectId(id) } : null;
 }
 
+function getCompanyScopedIdFilter(
+  id: string,
+  companyIds: string[],
+): Filter<JobDocument> | null {
+  const idFilter = getIdFilter(id);
+  const validCompanyIds = companyIds
+    .filter((companyId) => ObjectId.isValid(companyId))
+    .map((companyId) => new ObjectId(companyId));
+  if (!idFilter || validCompanyIds.length === 0) return null;
+  return { ...idFilter, company_id: { $in: validCompanyIds } };
+}
+
 export async function listJobs(activeOnly = false): Promise<JobDto[]> {
   const collection = await getJobsCollection();
   const filter = activeOnly ? { is_active: true } : {};
   const jobs = await collection.find(filter).sort({ created_at: -1 }).toArray();
+  return jobs.map(toJobDto);
+}
+
+export async function listJobsForCompanies(companyIds: string[]): Promise<JobDto[]> {
+  const validCompanyIds = companyIds
+    .filter((companyId) => ObjectId.isValid(companyId))
+    .map((companyId) => new ObjectId(companyId));
+  if (validCompanyIds.length === 0) return [];
+  const jobs = await (await getJobsCollection())
+    .find({ company_id: { $in: validCompanyIds } })
+    .sort({ created_at: -1 })
+    .toArray();
   return jobs.map(toJobDto);
 }
 
@@ -119,8 +148,45 @@ export async function updateJob(
   return updated ? toJobDto(updated) : null;
 }
 
+export async function updateJobForCompanies(
+  id: string,
+  companyIds: string[],
+  data: Partial<Omit<JobDocument, "_id" | "created_at" | "updated_at">>,
+): Promise<JobDto | null> {
+  const filter = getCompanyScopedIdFilter(id, companyIds);
+  if (!filter) return null;
+  const setData = Object.fromEntries(
+    Object.entries(data).filter(([, value]) => value !== undefined),
+  );
+  const unsetData: Record<string, ""> = Object.fromEntries(
+    Object.entries(data)
+      .filter(([, value]) => value === undefined)
+      .map(([key]) => [key, ""]),
+  );
+  const update: UpdateFilter<JobDocument> = {
+    $set: { ...setData, updated_at: new Date() },
+    ...(Object.keys(unsetData).length ? { $unset: unsetData } : {}),
+  };
+  const updated = await (await getJobsCollection()).findOneAndUpdate(
+    filter,
+    update,
+    { returnDocument: "after" },
+  );
+  return updated ? toJobDto(updated) : null;
+}
+
 export async function deleteJob(id: string): Promise<boolean> {
   const filter = getIdFilter(id);
+  if (!filter) return false;
+  const result = await (await getJobsCollection()).deleteOne(filter);
+  return result.deletedCount === 1;
+}
+
+export async function deleteJobForCompanies(
+  id: string,
+  companyIds: string[],
+): Promise<boolean> {
+  const filter = getCompanyScopedIdFilter(id, companyIds);
   if (!filter) return false;
   const result = await (await getJobsCollection()).deleteOne(filter);
   return result.deletedCount === 1;

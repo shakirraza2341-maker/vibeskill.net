@@ -15,7 +15,7 @@ export async function getDatabase(): Promise<Db> {
     appName: "ai-mockinterview",
     maxPoolSize: 10,
     minPoolSize: 0,
-    serverSelectionTimeoutMS: 5000,
+    serverSelectionTimeoutMS: 10000,
     connectTimeoutMS: 10000,
   }).connect();
   if (process.env.NODE_ENV !== "production") mongoGlobal.__mongoClientPromise = clientPromise;

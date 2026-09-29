@@ -8,7 +8,7 @@
 4. Set `MONGODB_DB` (default: `ai_mockinterview`).
 5. Set a long random `CRON_SECRET` to protect cleanup requests.
 
-`MONGODB_URI` is server-only. It must never use a `NEXT_PUBLIC_` prefix or be sent to the browser. The application creates the `jobs` collection and its indexes on first database use.
+`MONGODB_URI` is server-only. It must never use a `NEXT_PUBLIC_` prefix or be sent to the browser. The application creates the `jobs`, `users`, and `companies` collections and their indexes on first use.
 
 ## Runtime architecture
 
@@ -18,6 +18,18 @@ Indexes:
 
 - `{ is_active: 1, created_at: -1 }` for the public active-jobs feed
 - `{ created_at: 1 }` for expiry cleanup
+- `{ user_id: 1, created_at: -1 }` on `companies` for owner-scoped listing
+
+Each company document requires a `user_id` referencing its owner. The company
+repository migrates the former unique owner index so a user can store multiple
+companies without losing existing company records.
+
+## Company API
+
+- `GET /api/profile/company` lists the signed-in user's companies.
+- `POST /api/profile/company` creates a company for the signed-in user.
+- `PUT /api/profile/company/:id` updates an owned company.
+- `DELETE /api/profile/company/:id` deletes an owned company.
 
 ## Job API
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireUser } from "../../../lib/auth-guard";
+import { listJobs } from "../../../lib/jobs-repository";
 import { findUserById, updateUserProfile } from "../../../lib/users-repository";
 
 export const runtime = "nodejs";
@@ -7,10 +8,22 @@ export const runtime = "nodejs";
 export async function GET() {
   const guard = await requireUser();
   if (guard.response) return guard.response;
+
   const user = await findUserById(guard.session!.user.id);
-  return user
-    ? NextResponse.json({ user: { ...user, password_hash: undefined } })
-    : NextResponse.json({ error: "User not found" }, { status: 404 });
+  if (!user) {
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
+  }
+
+  const jobs = await listJobs(true);
+  const registeredCompanies = Array.from(
+    new Set(jobs.map((job) => job.company_name.trim()).filter(Boolean)),
+  );
+
+  return NextResponse.json({
+    user: { ...user, password_hash: undefined },
+    jobs,
+    registeredCompanies,
+  });
 }
 
 export async function PUT(request: NextRequest) {

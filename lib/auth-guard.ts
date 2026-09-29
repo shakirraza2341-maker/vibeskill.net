@@ -24,3 +24,15 @@ export async function requireEmployer() {
   }
   return { session, response: null };
 }
+
+export async function requireEmployerRole() {
+  const guard = await requireUser();
+  if (guard.response) return guard;
+  if (guard.session!.user.role !== "employer") {
+    return {
+      session: null,
+      response: NextResponse.json({ error: "Employer role required" }, { status: 403 }),
+    };
+  }
+  return guard;
+}
