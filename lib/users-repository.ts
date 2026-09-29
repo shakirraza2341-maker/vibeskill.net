@@ -15,6 +15,9 @@ export type UserDocument = {
   bio?: string;
   company_name?: string;
   company_website?: string;
+  company_telephone?: string;
+  company_address?: string;
+  company_ntn?: string;
   employer_reason?: string;
   reviewed_at?: Date;
   reviewed_by?: ObjectId;
@@ -50,6 +53,9 @@ function toUserDto(user: UserDocument): UserDto {
     ...(user.bio ? { bio: user.bio } : {}),
     ...(user.company_name ? { company_name: user.company_name } : {}),
     ...(user.company_website ? { company_website: user.company_website } : {}),
+    ...(user.company_telephone ? { company_telephone: user.company_telephone } : {}),
+    ...(user.company_address ? { company_address: user.company_address } : {}),
+    ...(user.company_ntn ? { company_ntn: user.company_ntn } : {}),
     ...(user.employer_reason ? { employer_reason: user.employer_reason } : {}),
     created_at: user.created_at,
     updated_at: user.updated_at,
@@ -104,6 +110,19 @@ export async function updateUserProfile(
     { returnDocument: "after" },
   );
   return updated ? toUserDto(updated) : null;
+}
+
+export async function updateUserPassword(
+  id: string,
+  currentPasswordHash: string,
+  newPasswordHash: string,
+): Promise<boolean> {
+  if (!ObjectId.isValid(id)) return false;
+  const result = await (await getUsersCollection()).updateOne(
+    { _id: new ObjectId(id), password_hash: currentPasswordHash },
+    { $set: { password_hash: newPasswordHash, updated_at: new Date() } },
+  );
+  return result.modifiedCount === 1;
 }
 
 export async function submitEmployerApplication(
