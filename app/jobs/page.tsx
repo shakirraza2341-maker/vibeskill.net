@@ -9,6 +9,7 @@ const previewJobs = [
     id: "preview-1",
     title: "Senior Product Designer",
     company: "VibeSkill",
+    city: "New York",
     location: "New York, NY",
     employment_type: "Full-time",
     salary_min: 125000,
@@ -27,6 +28,7 @@ const previewJobs = [
     id: "preview-2",
     title: "Full-stack Engineer",
     company: "VibeSkill",
+    city: "New York",
     location: "Remote",
     employment_type: "Full-time",
     salary_min: 140000,
@@ -45,6 +47,7 @@ const previewJobs = [
     id: "preview-3",
     title: "Career Content Lead",
     company: "VibeSkill",
+    city: "New York",
     location: "Austin, TX",
     employment_type: "Full-time",
     salary_min: 90000,
@@ -65,6 +68,7 @@ type Job = Omit<(typeof previewJobs)[number], "salary_min" | "salary_max"> & {
   salary_min?: number;
   salary_max?: number;
   country: string;
+  city: string;
 };
 
 async function getJobs(): Promise<{ jobs: Job[]; isUsingFallback: boolean }> {
@@ -77,6 +81,7 @@ async function getJobs(): Promise<{ jobs: Job[]; isUsingFallback: boolean }> {
         id: job.id,
         title: job.title,
         company: job.company_name,
+        city: job.city,
         location: job.location,
         country: job.country,
         employment_type: "Full-time",
@@ -84,6 +89,8 @@ async function getJobs(): Promise<{ jobs: Job[]; isUsingFallback: boolean }> {
         salary_max: job.maximum_salary,
         description1: job.description1,
         description2: job.description2,
+        required: job.required,
+        apply_url: job.apply_url,
         category: job.category,
         remote: job.remote_available,
         posted_at: job.created_at,

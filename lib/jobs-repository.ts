@@ -24,9 +24,10 @@ export type JobDocument = {
   updated_at?: Date;
 };
 
-export type JobDto = Omit<JobDocument, "_id" | "created_at" | "updated_at" | "company_id"> & {
+export type JobDto = Omit<JobDocument, "_id" | "created_at" | "updated_at" | "company_id" | "user_id"> & {
   id: string;
   company_id?: string;
+  user_id?: string;
   created_at: string;
   updated_at?: string;
 };

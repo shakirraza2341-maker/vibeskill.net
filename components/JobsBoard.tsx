@@ -1,18 +1,21 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { BriefcaseBusiness, ChevronDown, MapPin } from "lucide-react";
 
 type Job = {
   id: string;
   title: string;
   company: string;
-  location: string;
+  city: string;
   country: string;
   employment_type: string;
   salary_min?: number | null;
   salary_max?: number | null;
   description1: string;
   description2: string;
+  required?: string;
+  apply_url?: string;
   category: string;
   remote: boolean;
   posted_at: string;
@@ -56,7 +59,10 @@ const relativeDate = (date: string, now: number | null) => {
 
 export default function JobsBoard({ jobs, isUsingFallback }: JobsBoardProps) {
   const [query, setQuery] = useState("");
-  const [location, setLocation] = useState("All locations");
+  const [category, setCategory] = useState("All categories");
+  const [city, setCity] = useState("All cities");
+  const [appliedCategory, setAppliedCategory] = useState("All categories");
+  const [appliedCity, setAppliedCity] = useState("All cities");
   const [type, setType] = useState("All job types");
   const [remoteOnly, setRemoteOnly] = useState(false);
   const [selectedId, setSelectedId] = useState(jobs[0]?.id || "");
@@ -93,13 +99,30 @@ export default function JobsBoard({ jobs, isUsingFallback }: JobsBoardProps) {
     fetchUserCountry();
   }, []);
 
-  const locations = useMemo(
+  const categories = useMemo(
     () => [
-      "All locations",
-      ...Array.from(new Set(jobs.map((job) => job.location))),
+      "All categories",
+      ...Array.from(new Set(jobs.map((job) => job.category))).sort((a, b) =>
+        a.localeCompare(b),
+      ),
     ],
     [jobs],
   );
+  const cities = useMemo(() => {
+    const countryJobs = userCountry
+      ? jobs.filter(
+          (job) =>
+            normalizeCountry(job.country) === normalizeCountry(userCountry),
+        )
+      : jobs;
+
+    return [
+      "All cities",
+      ...Array.from(new Set(countryJobs.map((job) => job.city))).sort(
+        (a, b) => a.localeCompare(b),
+      ),
+    ];
+  }, [jobs, userCountry]);
   const types = useMemo(
     () => [
       "All job types",
@@ -120,18 +143,28 @@ export default function JobsBoard({ jobs, isUsingFallback }: JobsBoardProps) {
         : null;
       const matchesCountry =
         !normalizedUserCountry ||
-        location !== "All locations" ||
+        appliedCity !== "All cities" ||
         normalizeCountry(job.country) === normalizedUserCountry;
 
       return (
         (!normalizedQuery || searchable.includes(normalizedQuery)) &&
-        (location === "All locations" || job.location === location) &&
+        (appliedCategory === "All categories" ||
+          job.category === appliedCategory) &&
+        (appliedCity === "All cities" || job.city === appliedCity) &&
         (type === "All job types" || job.employment_type === type) &&
         (!remoteOnly || job.remote) &&
         matchesCountry
       );
     });
-  }, [jobs, location, query, remoteOnly, type, userCountry]);
+  }, [
+    appliedCategory,
+    appliedCity,
+    jobs,
+    query,
+    remoteOnly,
+    type,
+    userCountry,
+  ]);
 
   const totalPages = Math.max(
     1,
@@ -148,7 +181,7 @@ export default function JobsBoard({ jobs, isUsingFallback }: JobsBoardProps) {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [location, query, remoteOnly, type, userCountry]);
+  }, [appliedCategory, appliedCity, query, remoteOnly, type, userCountry]);
 
   useEffect(() => {
     setCurrentPage((page) => Math.min(page, totalPages));
@@ -187,56 +220,72 @@ export default function JobsBoard({ jobs, isUsingFallback }: JobsBoardProps) {
 
   return (
     <div className="pb-1">
-      <div className="mt-8 grid grid-cols-[1.45fr_1fr_auto] gap-2 bg-cream p-2.5 shadow-[10px_10px_0_var(--color-teal)] max-[620px]:mt-6 max-[620px]:grid-cols-1 max-[620px]:gap-2 max-[620px]:p-2 max-[620px]:shadow-[7px_7px_0_var(--color-teal)]">
-        <div className="flex min-h-12 items-center gap-2.5 border border-ink/15 bg-paper px-3.5">
-          <span
+      <form
+        className="mt-8 grid grid-cols-[1fr_1fr_1.45fr_auto] gap-2 bg-cream p-2.5 shadow-[10px_10px_0_var(--color-teal)] max-[900px]:grid-cols-2 max-[620px]:mt-6 max-[620px]:grid-cols-1 max-[620px]:gap-2 max-[620px]:p-2 max-[620px]:shadow-[7px_7px_0_var(--color-teal)]"
+        onSubmit={(event) => {
+          event.preventDefault();
+          setAppliedCategory(category);
+          setAppliedCity(city);
+        }}
+      >
+        <label className="group relative flex min-h-14 min-w-0 items-center gap-3 border border-ink/15 bg-paper px-3.5 transition-colors hover:border-coral focus-within:border-coral focus-within:shadow-[inset_0_-2px_var(--color-coral)]">
+          <BriefcaseBusiness
             aria-hidden="true"
-            className="text-[23px] leading-none text-coral"
-          >
-            ⌕
-          </span>
-          <label className="sr-only" htmlFor="job-query">
-            Search jobs
-          </label>
-          <input
-            id="job-query"
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Job title, skills, or company"
-            value={query}
-            className="w-full bg-transparent py-3.5 text-[13px] text-ink outline-none placeholder:text-muted"
+            className="size-4 shrink-0 text-coral"
           />
-        </div>
-        <div className="flex min-h-12 items-center gap-2.5 border border-ink/15 bg-paper px-3.5">
-          <span
-            aria-hidden="true"
-            className="text-[23px] leading-none text-coral"
-          >
-            ⌖
+          <span className="min-w-0 flex-1">
+            <span className="block font-mono text-[9px] uppercase tracking-[.1em] text-muted">
+              Category
+            </span>
+            <select
+              id="job-category"
+              onChange={(event) => setCategory(event.target.value)}
+              value={category}
+              className="w-full appearance-none bg-transparent py-1 text-[13px] font-medium text-ink outline-none"
+            >
+              {categories.map((item) => (
+                <option key={item}>{item}</option>
+              ))}
+            </select>
           </span>
-          <label className="sr-only" htmlFor="job-location">
-            Location
-          </label>
-          <select
-            id="job-location"
-            onChange={(event) => setLocation(event.target.value)}
-            value={location}
-            className="w-full cursor-pointer bg-transparent py-3.5 text-[13px] text-ink outline-none"
-          >
-            {locations.map((item) => (
-              <option key={item}>{item}</option>
-            ))}
-          </select>
-        </div>
+          <ChevronDown
+            aria-hidden="true"
+            className="size-4 shrink-0 text-muted"
+          />
+        </label>
+        <label className="group relative flex min-h-14 min-w-0 items-center gap-3 border border-ink/15 bg-paper px-3.5 transition-colors hover:border-coral focus-within:border-coral focus-within:shadow-[inset_0_-2px_var(--color-coral)]">
+          <MapPin aria-hidden="true" className="size-4 shrink-0 text-coral" />
+          <span className="min-w-0 flex-1">
+            <span className="block font-mono text-[9px] uppercase tracking-[.1em] text-muted">
+              City
+            </span>
+            <select
+              id="job-city"
+              onChange={(event) => setCity(event.target.value)}
+              value={city}
+              className="w-full appearance-none bg-transparent py-1 text-[13px] font-medium text-ink outline-none"
+            >
+              {cities.map((item) => (
+                <option key={item}>{item}</option>
+              ))}
+            </select>
+          </span>
+          <ChevronDown
+            aria-hidden="true"
+            className="size-4 shrink-0 text-muted"
+          />
+        </label>
+
         <button
-          className="bg-coral px-5 text-left text-xs font-bold text-paper max-[620px]:min-h-12"
-          type="button"
+          className="bg-coral px-5 text-left text-xs font-bold text-paper transition-all hover:-translate-y-0.5 hover:bg-ink hover:shadow-[4px_4px_0_var(--color-coral)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink active:translate-y-0 max-[620px]:min-h-12"
+          type="submit"
         >
           Search jobs{" "}
           <span aria-hidden="true" className="ml-4 text-[17px]">
             ↗
           </span>
         </button>
-      </div>
+      </form>
       <aside
         className="pt-14 pr-7 max-[900px]:pr-5 max-[620px]:border-b max-[620px]:border-ink/20 max-[620px]:pb-7 max-[620px]:pt-11"
         aria-label="Job filters"
@@ -248,7 +297,10 @@ export default function JobsBoard({ jobs, isUsingFallback }: JobsBoardProps) {
             className="bg-transparent p-0 font-mono text-[10px] uppercase tracking-[.08em] text-coral"
             onClick={() => {
               setQuery("");
-              setLocation("All locations");
+              setCategory("All categories");
+              setAppliedCategory("All categories");
+              setCity("All cities");
+              setAppliedCity("All cities");
               setType("All job types");
               setRemoteOnly(false);
             }}
@@ -322,7 +374,7 @@ export default function JobsBoard({ jobs, isUsingFallback }: JobsBoardProps) {
                     {job.title}
                   </strong>
                   <span className="mt-3 block text-xs text-muted">
-                    {job.location} <i className="not-italic">·</i>{" "}
+                    {job.city} <i className="not-italic">·</i>{" "}
                     {job.employment_type}
                   </span>
                   <span className="mt-5 block text-xs font-bold text-coral">
@@ -341,7 +393,10 @@ export default function JobsBoard({ jobs, isUsingFallback }: JobsBoardProps) {
                   type="button"
                   onClick={() => {
                     setQuery("");
-                    setLocation("All locations");
+                    setCategory("All categories");
+                    setAppliedCategory("All categories");
+                    setCity("All cities");
+                    setAppliedCity("All cities");
                     setType("All job types");
                     setRemoteOnly(false);
                     setUserCountry(null);
@@ -417,15 +472,31 @@ export default function JobsBoard({ jobs, isUsingFallback }: JobsBoardProps) {
                     Selected role
                   </span>
                 </div>
-                <span className="float-right grid size-12 place-items-center bg-ink font-mono text-xs text-paper">
-                  VS
-                </span>
-                <h1 className="mt-5 max-w-2xl font-display text-[clamp(44px,5vw,76px)] font-medium leading-[.92] tracking-[-.055em]">
-                  {selectedJob.title}
-                </h1>
+                <div className="mt-5 flex items-start justify-between gap-6 max-[620px]:flex-col">
+                  <h1 className="max-w-2xl font-display text-[clamp(44px,5vw,76px)] font-medium leading-[.92] tracking-[-.055em]">
+                    {selectedJob.title}
+                  </h1>
+                  {selectedJob.apply_url ? (
+                    <a
+                      className="shrink-0 bg-ink px-5 py-4 text-left text-[13px] font-bold text-paper transition-colors hover:bg-coral"
+                      href={selectedJob.apply_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Apply for this role{" "}
+                      <span aria-hidden="true" className="ml-8 text-lg">
+                        ↗
+                      </span>
+                    </a>
+                  ) : (
+                    <span className="shrink-0 py-4 text-xs text-muted">
+                      Application link unavailable
+                    </span>
+                  )}
+                </div>
                 <p className="mt-5 text-sm text-muted">
                   {selectedJob.company} <i className="not-italic">·</i>{" "}
-                  {selectedJob.location}
+                  {selectedJob.city}
                 </p>
               </div>
               <div className="mt-12 grid grid-cols-2 gap-6 border-y border-ink/15 py-5">
@@ -447,8 +518,16 @@ export default function JobsBoard({ jobs, isUsingFallback }: JobsBoardProps) {
                 </div>
               </div>
               <div className="mt-10 max-w-2xl text-[15px] leading-relaxed text-muted">
-                <p>{selectedJob.description1}</p>
+                <h2 className="font-display text-3xl font-medium tracking-[-.04em] text-ink">
+                  Role description
+                </h2>
+                <p className="mt-4">{selectedJob.description1}</p>
                 <p className="mt-5">{selectedJob.description2}</p>
+                {selectedJob.required && (
+                  <p className="mt-5 border-l-2 border-coral pl-4 text-sm text-ink">
+                    <strong>{selectedJob.required}</strong> positions available
+                  </p>
+                )}
                 <h2 className="mt-10 font-display text-3xl font-medium tracking-[-.04em] text-ink">
                   What you&apos;ll bring
                 </h2>
@@ -463,15 +542,6 @@ export default function JobsBoard({ jobs, isUsingFallback }: JobsBoardProps) {
                   ))}
                 </ul>
               </div>
-              <button
-                className="mt-10 bg-ink px-5 py-4 text-left text-[13px] font-bold text-paper"
-                type="button"
-              >
-                Apply for this role{" "}
-                <span aria-hidden="true" className="ml-8 text-lg">
-                  ↗
-                </span>
-              </button>
             </>
           ) : (
             <div className="border border-ink/15 p-6 text-sm">

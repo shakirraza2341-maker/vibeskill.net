@@ -18,29 +18,27 @@ export default function LoginPage() {
       email,
       password,
       redirect: false,
-      callbackUrl: "/admin",
-        callbackUrl: "/profile",
+      callbackUrl: "/profile",
     });
     if (!result?.ok) {
       setError("The email or password is incorrect.");
       setIsLoading(false);
       return;
     }
-    window.location.assign(result.url ?? "/admin");
-      window.location.assign(result.url ?? "/profile");
+    window.location.assign(result.url ?? "/profile");
   }
 
   return (
     <main className="flex min-h-screen items-center justify-center py-12">
       <div className="w-full max-w-md border border-ink/15 bg-paper p-8 shadow-[12px_12px_0_var(--color-coral)] sm:p-10">
         <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.16em] text-coral">
-          VibeSkill workspace
+          VibeSkill profile
         </p>
         <h1 className="font-display text-4xl tracking-[-0.04em]">
           Welcome back
         </h1>
         <p className="mt-3 text-sm text-muted">
-          Sign in to manage your admin workspace.
+          Sign in to manage your profile.
         </p>
         <form className="mt-8 grid gap-5" onSubmit={handleSubmit}>
           <label className="grid gap-2 text-sm font-bold">
