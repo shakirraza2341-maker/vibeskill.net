@@ -67,6 +67,7 @@ export default function JobsBoard({ jobs, isUsingFallback }: JobsBoardProps) {
   const [remoteOnly, setRemoteOnly] = useState(false);
   const [selectedId, setSelectedId] = useState(jobs[0]?.id || "");
   const [currentPage, setCurrentPage] = useState(1);
+  const [isMobileJobsOpen, setIsMobileJobsOpen] = useState(false);
   const [currentTime, setCurrentTime] = useState<number | null>(null);
 
   const [userCountry, setUserCountry] = useState<string | null>(null);
@@ -118,8 +119,8 @@ export default function JobsBoard({ jobs, isUsingFallback }: JobsBoardProps) {
 
     return [
       "All cities",
-      ...Array.from(new Set(countryJobs.map((job) => job.city))).sort(
-        (a, b) => a.localeCompare(b),
+      ...Array.from(new Set(countryJobs.map((job) => job.city))).sort((a, b) =>
+        a.localeCompare(b),
       ),
     ];
   }, [jobs, userCountry]);
@@ -244,7 +245,9 @@ export default function JobsBoard({ jobs, isUsingFallback }: JobsBoardProps) {
               className="w-full appearance-none bg-transparent py-1 text-[13px] font-medium text-ink outline-none"
             >
               {categories.map((item) => (
-                <option key={item}>{item}</option>
+                <option className="bg-paper text-ink" key={item}>
+                  {item}
+                </option>
               ))}
             </select>
           </span>
@@ -266,7 +269,9 @@ export default function JobsBoard({ jobs, isUsingFallback }: JobsBoardProps) {
               className="w-full appearance-none bg-transparent py-1 text-[13px] font-medium text-ink outline-none"
             >
               {cities.map((item) => (
-                <option key={item}>{item}</option>
+                <option className="bg-paper text-ink" key={item}>
+                  {item}
+                </option>
               ))}
             </select>
           </span>
@@ -330,135 +335,169 @@ export default function JobsBoard({ jobs, isUsingFallback }: JobsBoardProps) {
         </div>
       </aside>
 
-      <div className="grid grid-cols-[minmax(180px,300px)_minmax(0,1fr)] items-start gap-0 pb-24 max-[900px]:grid-cols-[minmax(160px,260px)_minmax(0,1fr)] max-[620px]:block">
-        <section
-          className="border-r border-ink/15 pr-8 pt-14 max-[900px]:pr-6 max-[620px]:border-0 max-[620px]:pr-0 max-[620px]:pt-7"
-          aria-label="Available jobs"
-        >
-          <div className="flex items-start justify-between">
-            <div>
-              <span className="font-mono text-[9px] uppercase tracking-[.12em] text-coral">
-                Open positions
+      <div className="grid grid-cols-[minmax(180px,300px)_minmax(0,1fr)] items-start gap-0 pb-24 max-[900px]:grid-cols-[minmax(160px,260px)_minmax(0,1fr)] max-[767px]:block">
+        <div className="min-w-0">
+          <button
+            aria-controls="available-jobs-list"
+            aria-expanded={isMobileJobsOpen}
+            className="mb-5 flex w-full items-center gap-3 border border-ink/15 bg-cream p-4 text-left text-ink shadow-[5px_5px_0_var(--color-teal)] transition-colors hover:border-coral focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-coral min-[768px]:hidden"
+            onClick={() => setIsMobileJobsOpen((open) => !open)}
+            type="button"
+          >
+            <span className="grid size-11 shrink-0 place-items-center bg-coral text-paper">
+              <BriefcaseBusiness aria-hidden="true" className="size-5" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-mono text-[9px] uppercase tracking-[.12em] text-coral">
+                Available jobs
               </span>
-              <h2 className="mt-2 font-display text-[14px] font-medium leading-none tracking-[-.055em] max-[620px]:text-[25px]">
-                {filteredJobs.length} roles found
-              </h2>
+              <strong className="mt-1 block text-sm font-semibold">
+                {filteredJobs.length} roles to explore
+              </strong>
+            </span>
+            <span className="flex shrink-0 items-center gap-1 font-mono text-[10px] uppercase tracking-[.08em] text-coral">
+              {isMobileJobsOpen ? "Hide" : "Show"}
+              <ChevronDown
+                aria-hidden="true"
+                className={`size-4 transition-transform ${isMobileJobsOpen ? "rotate-180" : ""}`}
+              />
+            </span>
+          </button>
+          <section
+            id="available-jobs-list"
+            className={`border-r border-ink/15 pr-8 pt-14 max-[900px]:pr-6 max-[767px]:border-0 max-[767px]:pr-0 max-[767px]:pt-0 ${isMobileJobsOpen ? "max-[767px]:block" : "max-[767px]:hidden"}`}
+            aria-label="Available jobs"
+          >
+            <div className="flex items-start justify-between">
+              <div>
+                <span className="font-mono text-[9px] uppercase tracking-[.12em] text-coral">
+                  Open positions
+                </span>
+                <h2 className="mt-2 font-display text-[14px] font-medium leading-none tracking-[-.055em] max-[767px]:text-[25px]">
+                  {filteredJobs.length} roles found
+                </h2>
+              </div>
+              <span className="pt-1.5 text-xs text-muted">Newest first</span>
             </div>
-            <span className="pt-1.5 text-xs text-muted">Newest first</span>
-          </div>
-          <div className="mt-7 grid gap-2">
-            {isLoadingCountry ? (
-              <div className="p-4 text-xs text-muted">
-                Detecting your region...
-              </div>
-            ) : filteredJobs.length ? (
-              paginatedJobs.map((job) => (
+            <div className="mt-7 grid gap-2">
+              {isLoadingCountry ? (
+                <div className="p-4 text-xs text-muted">
+                  Detecting your region...
+                </div>
+              ) : filteredJobs.length ? (
+                paginatedJobs.map((job) => (
+                  <button
+                    aria-pressed={visibleSelectedId === job.id}
+                    className={`group relative w-full border p-5 text-left text-ink transition-all hover:-translate-y-0.5 hover:border-coral max-[767px]:p-4 ${visibleSelectedId === job.id ? "border-coral bg-cream shadow-[5px_5px_0_var(--color-coral)]" : "border-ink/15 bg-transparent"}`}
+                    key={job.id}
+                    onClick={() => {
+                      setSelectedId(job.id);
+                      setIsMobileJobsOpen(false);
+                    }}
+                    type="button"
+                  >
+                    <span className="flex justify-between font-mono text-[10px] uppercase tracking-[.08em] text-muted">
+                      <span
+                        className={
+                          visibleSelectedId === job.id ? "text-coral" : ""
+                        }
+                      >
+                        {job.company}
+                      </span>
+                      <span>{relativeDate(job.posted_at, currentTime)}</span>
+                    </span>
+                    <strong className="mt-4 block font-display text-[27px] font-medium leading-none tracking-[-.04em]">
+                      {job.title}
+                    </strong>
+                    <span className="mt-3 block text-xs text-muted">
+                      {job.city} <i className="not-italic">·</i>{" "}
+                      {job.employment_type}
+                    </span>
+                    <span className="mt-5 block text-xs font-bold text-coral">
+                      {formatSalary(job)}{" "}
+                      <span className="ml-2 text-base" aria-hidden="true">
+                        ↗
+                      </span>
+                    </span>
+                  </button>
+                ))
+              ) : (
+                <div className="border border-ink/15 p-6 text-sm">
+                  <strong>No roles match those filters.</strong>
+                  <button
+                    className="mt-2 block text-xs text-coral underline"
+                    type="button"
+                    onClick={() => {
+                      setQuery("");
+                      setCategory("All categories");
+                      setAppliedCategory("All categories");
+                      setCity("All cities");
+                      setAppliedCity("All cities");
+                      setType("All job types");
+                      setRemoteOnly(false);
+                      setUserCountry(null);
+                    }}
+                  >
+                    Reset search & view all countries
+                  </button>
+                </div>
+              )}
+            </div>
+            {filteredJobs.length > JOBS_PER_PAGE && (
+              <nav
+                className="mt-6 flex items-center justify-between gap-3 border-t border-ink/15 pt-4"
+                aria-label="Job list pagination"
+              >
                 <button
-                  aria-pressed={visibleSelectedId === job.id}
-                  className={`group relative w-full border p-5 text-left text-ink transition-all hover:-translate-y-0.5 hover:border-coral max-[620px]:p-4 ${visibleSelectedId === job.id ? "border-coral bg-cream shadow-[5px_5px_0_var(--color-coral)]" : "border-ink/15 bg-transparent"}`}
-                  key={job.id}
-                  onClick={() => setSelectedId(job.id)}
+                  className="bg-transparent p-0 text-xs font-bold text-ink disabled:cursor-not-allowed disabled:text-muted"
+                  disabled={currentPage === 1}
+                  onClick={() =>
+                    setCurrentPage((page) => Math.max(1, page - 1))
+                  }
                   type="button"
                 >
-                  <span className="flex justify-between font-mono text-[10px] uppercase tracking-[.08em] text-muted">
-                    <span
-                      className={
-                        visibleSelectedId === job.id ? "text-coral" : ""
-                      }
-                    >
-                      {job.company}
-                    </span>
-                    <span>{relativeDate(job.posted_at, currentTime)}</span>
-                  </span>
-                  <strong className="mt-4 block font-display text-[27px] font-medium leading-none tracking-[-.04em]">
-                    {job.title}
-                  </strong>
-                  <span className="mt-3 block text-xs text-muted">
-                    {job.city} <i className="not-italic">·</i>{" "}
-                    {job.employment_type}
-                  </span>
-                  <span className="mt-5 block text-xs font-bold text-coral">
-                    {formatSalary(job)}{" "}
-                    <span className="ml-2 text-base" aria-hidden="true">
-                      ↗
-                    </span>
-                  </span>
+                  Previous
                 </button>
-              ))
-            ) : (
-              <div className="border border-ink/15 p-6 text-sm">
-                <strong>No roles match those filters.</strong>
+                <div className="flex items-center gap-1" aria-label="Pages">
+                  {paginationItems.map((item, index) =>
+                    item === "ellipsis" ? (
+                      <span
+                        className="grid size-7 place-items-center text-xs text-muted"
+                        key={`ellipsis-${index}`}
+                        aria-hidden="true"
+                      >
+                        ...
+                      </span>
+                    ) : (
+                      <button
+                        aria-current={currentPage === item ? "page" : undefined}
+                        className={`grid size-7 place-items-center text-xs ${currentPage === item ? "bg-coral font-bold text-paper" : "bg-transparent text-muted hover:text-ink"}`}
+                        key={item}
+                        onClick={() => setCurrentPage(item)}
+                        type="button"
+                      >
+                        {item}
+                      </button>
+                    ),
+                  )}
+                </div>
                 <button
-                  className="mt-2 block text-xs text-coral underline"
+                  className="bg-transparent p-0 text-xs font-bold text-ink disabled:cursor-not-allowed disabled:text-muted"
+                  disabled={currentPage === totalPages}
+                  onClick={() =>
+                    setCurrentPage((page) => Math.min(totalPages, page + 1))
+                  }
                   type="button"
-                  onClick={() => {
-                    setQuery("");
-                    setCategory("All categories");
-                    setAppliedCategory("All categories");
-                    setCity("All cities");
-                    setAppliedCity("All cities");
-                    setType("All job types");
-                    setRemoteOnly(false);
-                    setUserCountry(null);
-                  }}
                 >
-                  Reset search & view all countries
+                  Next
                 </button>
-              </div>
+              </nav>
             )}
-          </div>
-          {filteredJobs.length > JOBS_PER_PAGE && (
-            <nav
-              className="mt-6 flex items-center justify-between gap-3 border-t border-ink/15 pt-4"
-              aria-label="Job list pagination"
-            >
-              <button
-                className="bg-transparent p-0 text-xs font-bold text-ink disabled:cursor-not-allowed disabled:text-muted"
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
-                type="button"
-              >
-                Previous
-              </button>
-              <div className="flex items-center gap-1" aria-label="Pages">
-                {paginationItems.map((item, index) =>
-                  item === "ellipsis" ? (
-                    <span
-                      className="grid size-7 place-items-center text-xs text-muted"
-                      key={`ellipsis-${index}`}
-                      aria-hidden="true"
-                    >
-                      ...
-                    </span>
-                  ) : (
-                    <button
-                      aria-current={currentPage === item ? "page" : undefined}
-                      className={`grid size-7 place-items-center text-xs ${currentPage === item ? "bg-coral font-bold text-paper" : "bg-transparent text-muted hover:text-ink"}`}
-                      key={item}
-                      onClick={() => setCurrentPage(item)}
-                      type="button"
-                    >
-                      {item}
-                    </button>
-                  ),
-                )}
-              </div>
-              <button
-                className="bg-transparent p-0 text-xs font-bold text-ink disabled:cursor-not-allowed disabled:text-muted"
-                disabled={currentPage === totalPages}
-                onClick={() =>
-                  setCurrentPage((page) => Math.min(totalPages, page + 1))
-                }
-                type="button"
-              >
-                Next
-              </button>
-            </nav>
-          )}
-        </section>
+          </section>
+        </div>
 
         <article
-          className="min-w-0 px-8 pt-14 max-[900px]:px-6 max-[620px]:mt-9 max-[620px]:border-t max-[620px]:px-0 max-[620px]:pt-9"
+          className="min-w-0 px-8 pt-14 max-[900px]:px-6 max-[767px]:mt-9 max-[767px]:border-t max-[767px]:px-0 max-[767px]:pt-9"
           aria-label="Job details"
         >
           {selectedJob ? (
